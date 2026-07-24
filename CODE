@@ -1,0 +1,227 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
+
+#define BUTTON_PIN 26
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+int page = 1;
+
+bool screenOn = true;
+bool lastButtonState = HIGH;
+
+unsigned long lastActivity = 0;
+const unsigned long screenTimeout = 15000; // 15 seconds
+
+
+void setup() {
+
+pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+Wire.begin(21, 22);
+
+display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+
+lastActivity = millis();
+
+showPage();
+}
+
+
+void loop() {
+
+bool buttonState = digitalRead(BUTTON_PIN);
+
+
+if (lastButtonState == HIGH && buttonState == LOW) {
+
+lastActivity = millis();
+
+
+// Wake from idle
+if (!screenOn) {
+
+screenOn = true;
+
+page = 1;
+
+display.ssd1306_command(SSD1306_DISPLAYON);
+
+showPage();
+
+delay(150);
+
+lastButtonState = buttonState;
+return;
+}
+
+
+// Normal page change
+
+page++;
+
+if (page > 3) {
+page = 1;
+}
+
+pageAnimation();
+
+showPage();
+
+delay(150);
+}
+
+
+lastButtonState = buttonState;
+
+
+
+// Turn screen off after 15 seconds
+
+if (screenOn && millis() - lastActivity >= screenTimeout) {
+
+display.clearDisplay();
+display.display();
+
+display.ssd1306_command(SSD1306_DISPLAYOFF);
+
+screenOn = false;
+
+page = 1;
+}
+
+}
+
+
+
+// Flash transition effect
+
+void pageAnimation() {
+
+display.clearDisplay();
+
+display.fillScreen(SSD1306_WHITE);
+
+display.display();
+
+delay(250);
+
+
+display.clearDisplay();
+
+display.display();
+
+delay(250);
+}
+
+
+
+// Display pages
+
+void showPage() {
+
+display.clearDisplay();
+
+display.setTextColor(SSD1306_WHITE);
+
+
+
+// PAGE 1
+
+if (page == 1) {
+
+display.setTextSize(2);
+
+display.setCursor(5,5);
+
+display.println("IF FOUND");
+
+
+display.setTextSize(1);
+
+display.setCursor(5,32);
+
+display.println("CALL");
+
+
+display.setCursor(5,45);
+
+display.println("(xxx)-xxx-xxxx");
+
+}
+
+
+
+// PAGE 2
+
+if (page == 2) {
+
+display.setTextSize(1.5);
+
+display.setCursor(0,0);
+
+display.println("xxx");
+
+display.println("xxx");
+
+display.println("xxx");
+
+display.println("xxx");
+
+display.println("xxx");
+
+
+}
+
+
+
+// PAGE 3
+
+if (page == 3) {
+
+display.setTextSize(1);
+
+display.setCursor(0,0);
+
+display.println("MEDICAL ID");
+
+
+display.setCursor(0,14);
+
+display.println("xxx");
+
+
+display.setCursor(0,26);
+
+display.println("xxx");
+
+
+display.setCursor(0,38);
+
+display.println("xxx");
+
+
+display.setCursor(0,50);
+
+display.println("xxx");
+
+}
+
+
+
+// Page number bottom right
+
+display.setTextSize(1);
+
+display.setCursor(122,56);
+
+display.print(page);
+
+
+display.display();
+}
