@@ -1,0 +1,3 @@
+Simply flash your ESP-32S or D-Devmodule with arduino IDE, ((! MAKE SURE BAUD IS SET TO 115200 !)) make sure wiring is correct in pictures, auto screen shut off after 15 seconds, press the button to change between pages. 
+
+These files are supposed to be changed with YOUR info, change ( xxx ) to your information and update code in IDE
